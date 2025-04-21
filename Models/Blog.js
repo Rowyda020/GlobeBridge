@@ -19,6 +19,18 @@ const blogSchema = mongoose.Schema({
         type:[String],
         required:true
     },
+    location: {
+        country: String,
+        city: String,
+        coordinates: {
+            lat: Number,
+            lng: Number
+        }
+    },
+    budget: {
+        amount: Number,
+        currency: String
+    },
 },
 { timestamps: true });
 const Blog = mongoose.model('Blog', blogSchema);
