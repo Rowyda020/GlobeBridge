@@ -5,7 +5,7 @@ async function getLatestPosts(req,res){
     try{
         const posts = await Blog.find().sort({createdAt:-1})
         .populate('author','username profile.profilePhoto')
-        .limit(50)
+        .limit(10)
         .lean();
 
 
