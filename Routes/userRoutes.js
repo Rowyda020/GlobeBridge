@@ -15,9 +15,9 @@ const{
 
 router.post('/register', register);
 router.post('/login', login);
-router.get('/profile/:username', getUserProfile);
-router.post('/follow/:userId', auth, follow);
-router.post('/unfollow/:userId', auth, unFollow);
+router.get('/profile/:username',auth, getUserProfile);
+router.get('/follow/:userId', auth, follow);
+router.get('/unfollow/:userId', auth, unFollow);
 router.get('/feed', auth, getFollowedAuthorsPosts);
 
 module.exports = router;

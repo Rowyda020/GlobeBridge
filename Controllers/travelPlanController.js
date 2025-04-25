@@ -1,7 +1,6 @@
 const TravelPlan = require('../Models/TravelPlan');
 const User = require('../Models/User');
 
-console.log('TravelPlan in controller:', TravelPlan); // Should log [Function: TravelPlan]
 
 async function createTravelPlan(req, res) {
     try {

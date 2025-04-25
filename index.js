@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 const homeRoutes = require('./Routes/homeRoutes');
 const userRoutes = require('./Routes/userRoutes');
-const blogRoutes = require('./Routes/blogRoutes');
+const postRoutes = require('./Routes/postRoutes');
 const messageRoutes = require('./Routes/messageRoutes');
 const commentRoutes = require('./Routes/commentRoutes');
 const travelPlanRoutes = require('./Routes/travelPlanRoutes');
@@ -29,10 +29,10 @@ app.get('/', (req, res) => {
 // Routes
 app.use('/api/home', homeRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/blogs', blogRoutes);
+app.use('/api/posts', postRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/comments', commentRoutes);
-app.use('/api/travelPlan', travelPlanRoutes); // Note: travelPlan (singular) as per your setup
+app.use('/api/travelPlan', travelPlanRoutes); 
 
 app.use((err, req, res, next) => {
     console.error(err.stack);

@@ -1,11 +1,8 @@
 const User = require('../Models/User');
-const Blog = require('../Models/Blog');
+const Post = require('../Models/Post');
 const jwt = require('jsonwebtoken');
 
 const bcrypt = require('bcrypt');
-
-
-
 
 
 async function register(req, res) {
@@ -15,11 +12,8 @@ async function register(req, res) {
         if (!process.env.JWT_SECRET) {
             throw new Error('JWT_SECRET is not configured');
         }
-
-        // 1. Hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // 2. Create new user with hashed password
         const user = new User({
             username,
             email,
@@ -27,17 +21,14 @@ async function register(req, res) {
             profile
         });
 
-        // 3. Save user
         await user.save();
-
-        // 4. Generate token
         const token = jwt.sign(
             { _id: user._id },
             process.env.JWT_SECRET,
             { expiresIn: '7d' }
         );
 
-        // 5. Remove password from response
+
         const userResponse = user.toObject();
         delete userResponse.password;
 
@@ -93,48 +84,58 @@ async function login(req, res) {
 }
 
 
-async function getUserProfile(req,res){
-    try{
-
-        const user = await User.findOne({username:req.params.username})
-        .select('-password -followers -following')
-        if (!user) return res.status(404).json({ message: 'User not found' });
+async function getUserProfile(req, res) {
+    try {
+      
         if (!req.user) {
-            return res.json({
-              username: user.username,
-              profile: { profilePhoto: user.profile.profilePhoto }
-            });
-          }
-    } catch(err){
-        res.status(400).json({ message: err.message });
+            return res.status(401).json({ message: 'Authentication required to view user profiles' });
+        }
+
+        const user = await User.findOne({ username: req.params.username })
+            .select('-password -followers -following -email')
+            .lean();
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.json(user);
+    } catch (err) {
+        console.error('Get user profile error:', err);
+        res.status(400).json({ message: err.message || 'Failed to retrieve user profile' });
     }
 }
 
-async function follow(req,res) {
-    try{
-        const targerUser = await User.findById(req.params.userId)
+async function follow(req, res) {
+    try {
+        const targetUser = await User.findById(req.params.userId);
         const currentUser = await User.findById(req.user._id);
-        if (!targerUser) return res.status(404).json({ message: 'User not found' });
-        if (currentUser.following.includes(targerUser._id)) {
+        
+        if (!targetUser) return res.status(404).json({ message: 'User not found' });
+        if (currentUser._id.equals(targetUser._id)) {
+            return res.status(400).json({ message: 'Cannot follow yourself' });
+        }
+        if (currentUser.following.includes(targetUser._id)) {
             return res.status(400).json({ message: 'Already following this user' });
-          }
-          currentUser.following.push(targerUser._id);
-          targerUser.followers.push(currentUser._id);
-    await currentUser.save();
-    await targerUser.save();
-    res.json({ message: 'Successfully followed user' });
+        }
 
+        currentUser.following.push(targetUser._id);
+        targetUser.followers.push(currentUser._id);
+        
+        await currentUser.save();
+        await targetUser.save();
+        
+        res.json({ message: 'Successfully followed user' });
 
-    }catch(err){
+    } catch(err) {
         res.status(400).json({ message: err.message });
     }
-    
 }
 
 
 
-async function unFollow(req,res) {
-    try{
+async function unFollow(req, res) {
+    try {
         const targetUser = await User.findById(req.params.userId);
         const currentUser = await User.findById(req.user._id);
        
@@ -147,10 +148,10 @@ async function unFollow(req,res) {
         }
 
         currentUser.following = currentUser.following.filter(
-            id => id.toString() !== targetUser._id.toString()
+            id => !id.equals(targetUser._id)
         );
         targetUser.followers = targetUser.followers.filter(
-            id => id.toString() !== currentUser._id.toString()
+            id => !id.equals(currentUser._id)
         );
 
         await currentUser.save();
@@ -158,17 +159,14 @@ async function unFollow(req,res) {
         
         res.json({ message: 'Successfully unfollowed user' });
 
-
-    }catch(err){
+    } catch(err) {
         res.status(400).json({ message: err.message });
     }
-    
 }
-
 async function getFollowedAuthorsPosts(req, res){
     try {
       const user = await User.findById(req.user._id);
-      const posts = await Blog.find({ author: { $in: user.following } })
+      const posts = await Post.find({ author: { $in: user.following } })
         .sort({ createdAt: -1 })
         .populate('author', 'username profile.profilePhoto');
       

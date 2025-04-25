@@ -1,9 +1,9 @@
-const Blog = require('../Models/Blog');
+const Post = require('../Models/Post');
 
 
 async function getLatestPosts(req,res){
     try{
-        const posts = await Blog.find().sort({createdAt:-1})
+        const posts = await Post.find().sort({createdAt:-1})
         .populate('author','username profile.profilePhoto')
         .limit(10)
         .lean();

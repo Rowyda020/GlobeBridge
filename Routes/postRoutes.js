@@ -2,14 +2,14 @@ const express = require('express');
 const router = express.Router();
 const { auth} = require('../Middleware/auth');
 const{
-    searchBlogs,
+    searchPosts,
     createPost,
     updatePost,
     getPosts,
     deletePost
-    } = require('../Controllers/blogController')
+    } = require('../Controllers/postController')
 
-router.get('/searchBlogs', searchBlogs)
+router.get('/searchPosts',auth, searchPosts)
 router.post('/post', auth, createPost);
 router.put('/:id', auth, updatePost);
 router.delete('/:id', auth, deletePost);  

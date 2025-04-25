@@ -3,13 +3,12 @@ const User = require('../Models/User');
 
 console.log('Message in controller:', Message);
 
-// Send a message (registered users only)
 async function sendMessage(req, res) {
     try {
         const { receiverId, content } = req.body;
         const senderId = req.user._id;
 
-        // Verify receiver exists
+
         const receiver = await User.findById(receiverId);
         if (!receiver) {
             return res.status(404).json({ message: 'Receiver not found' });
@@ -19,7 +18,7 @@ async function sendMessage(req, res) {
             return res.status(400).json({ message: 'Cannot send message to yourself' });
         }
 
-        // Create message
+    
         const message = new Message({
             senderId,
             receiverId,
@@ -37,7 +36,7 @@ async function sendMessage(req, res) {
     }
 }
 
-// Get messages between two users (registered users only)
+
 async function getMessages(req, res) {
     try {
         const userId = req.user._id;
@@ -59,7 +58,6 @@ async function getMessages(req, res) {
     }
 }
 
-// Mark messages as read (registered users only)
 async function markMessagesAsRead(req, res) {
     try {
         const userId = req.user._id;

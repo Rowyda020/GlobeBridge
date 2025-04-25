@@ -1,5 +1,5 @@
 const Comment = require('../Models/Comment');
-const Blog = require('../Models/Blog');
+const Post = require('../Models/Post');
 
 console.log('Comment in controller:', Comment);
 
@@ -8,7 +8,7 @@ async function createComment(req, res) {
         const { blogId, content, parentCommentId } = req.body;
         const userId = req.user._id;
 
-        const blog = await Blog.findById(blogId);
+        const blog = await Post.findById(blogId);
         if (!blog) {
             return res.status(404).json({ message: 'Blog not found' });
         }
