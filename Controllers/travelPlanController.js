@@ -104,7 +104,6 @@ async function getTravelPlans(req, res) {
         }
 
         const skip = (page - 1) * limit;
-
         const totalPlans = await TravelPlan.countDocuments();
 
         const travelPlans = await TravelPlan.find()

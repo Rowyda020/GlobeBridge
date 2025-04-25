@@ -33,6 +33,6 @@ const travelPlanSchema = new mongoose.Schema({
     }
 });
 
-
+travelPlanSchema.index({createdAt: -1 });
 const TravelPlan = mongoose.model('TravelPlan', travelPlanSchema);
 module.exports = TravelPlan;
