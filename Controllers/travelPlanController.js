@@ -93,14 +93,42 @@ async function leaveTravelPlan(req, res) {
 
 async function getTravelPlans(req, res) {
     try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+
+        if (page < 1) {
+            return res.status(400).json({ message: 'Page number must be at least 1' });
+        }
+        if (limit < 1) {
+            return res.status(400).json({ message: 'Limit must be at least 1' });
+        }
+
+        const skip = (page - 1) * limit;
+
+        const totalPlans = await TravelPlan.countDocuments();
+
         const travelPlans = await TravelPlan.find()
             .populate('userId', 'username profile.profilePhoto')
             .populate('participants', 'username profile.profilePhoto')
-            .sort({ createdAt: -1 });
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
+            .lean();
 
-        res.json(travelPlans);
+        const totalPages = Math.ceil(totalPlans / limit);
+
+        res.json({
+            travelPlans,
+            pagination: {
+                currentPage: page,
+                totalPages,
+                totalPlans,
+                limit
+            }
+        });
     } catch (err) {
-        res.status(400).json({ message: err.message });
+        console.error('Get travel plans error:', err);
+        res.status(400).json({ message: err.message || 'Failed to retrieve travel plans' });
     }
 }
 
